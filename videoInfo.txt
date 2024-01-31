@@ -1,0 +1,8 @@
+Title
+Realtime Chat App with NextJS, GraphQL, NodeJS, MongoDB, Prisma, TypeScript (iMessage Clone)
+
+Author
+Shadee Merhi
+
+Video Link
+https://www.youtube.com/watch?v=mj_Qe2jBYS4
