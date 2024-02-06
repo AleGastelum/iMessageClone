@@ -1,7 +1,17 @@
 {
+  "dependencies": {
+    "@graphql-tools/schema": "^8.5.1",
+    "apollo-server-core": "^3.10.2",
+    "apollo-server-express": "^3.10.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "graphql": "^16.6.0",
+    "lodash.merge": "^4.6.2",
+    "next-auth": "^4.20.1",
+    "ts-node": "^10.9.2"
+  },
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/index.ts"
@@ -9,21 +19,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@auth/prisma-adapter": "^1.1.0",
-    "@graphql-tools/schema": "^10.0.2",
-    "apollo-server-core": "^3.13.0",
-    "apollo-server-express": "^3.13.0",
-    "dotenv": "^16.4.1",
-    "express": "^4.18.2",
-    "graphql": "^16.8.1",
-    "lodash.merge": "^4.6.2",
-    "next-auth": "^4.24.5",
-    "ts-node": "^10.9.2"
-  },
+  "description": "",
   "devDependencies": {
-    "@types/lodash.merge": "^4.6.9",
-    "nodemon": "^3.0.3",
-    "typescript": "^5.3.3"
+    "@types/lodash.merge": "^4.6.7",
+    "nodemon": "^2.0.22",
+    "typescript": "^5.0.2"
   }
 }
