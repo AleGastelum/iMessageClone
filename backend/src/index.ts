@@ -10,9 +10,10 @@ import typeDefs from "./graphql/typeDefs";
 import resolvers from "./graphql/resolvers";
 import { getSession } from "next-auth/react";
 import "dotenv/config";
+import { GraphQLContext, Session } from "./util/types";
+import { PrismaClient } from "@prisma/client";
 
 async function main() {
-	console.log(process.env.CLIENT_ORIGIN);
 	// Required logic for integrating with Express
 	const app = express();
 	// Our httpServer handles incoming requests to our Express app.
@@ -30,18 +31,22 @@ async function main() {
 		credentials: true,
 	};
 
+	// Context parameters
+	const prisma = new PrismaClient();
+	// const pubsub
+
 	// Same ApolloServer initialization as before, plus the drain plugin
 	// for our httpServer.
 	const server = new ApolloServer({
 		schema,
 		csrfPrevention: true,
 		cache: "bounded",
-		context: async ({ req, res }) => {
-			const session = await getSession({ req });
-			console.log("CONTEXT SESSION", session);
+		context: async ({ req, res }): Promise<GraphQLContext> => {
+			const session = await getSession({ req }) as Session;
 
 			return {
 				session,
+				prisma
 			};
 		},
 		plugins: [
