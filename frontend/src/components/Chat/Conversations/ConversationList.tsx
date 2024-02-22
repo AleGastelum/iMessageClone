@@ -35,6 +35,7 @@ const ConversationList: React.FunctionComponent<IConversationList> = ({ session 
       <ConversationModal
         isOpen={isOpen}
         onClose={onClose}
+        session={session}
       />
     </Box>
   );
