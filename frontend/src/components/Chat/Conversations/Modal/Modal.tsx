@@ -19,6 +19,7 @@ import UserSearchList from './UserSearchList';
 import Participants from './Participants';
 import toast from 'react-hot-toast';
 import { Session } from 'next-auth';
+import { useRouter } from 'next/router';
 
 interface IModalProps {
   session: Session;
@@ -28,6 +29,7 @@ interface IModalProps {
 
 const ConversationModal: React.FC<IModalProps> = ({ isOpen, onClose, session }) => {
   const { user: { id: userId } } = session;
+  const router = useRouter();
   
   const [ username, setUsername ] = useState("");
   const [ participants, setParticipants ] = useState<SearchedUser[]>([]);
@@ -58,6 +60,23 @@ const ConversationModal: React.FC<IModalProps> = ({ isOpen, onClose, session }) 
           participantsIds,
         }
       });
+
+      if (!data?.createConversation) {
+        throw new Error("Failed to create conversation");
+      }
+
+      const {
+        createConversation: { conversationId }
+      } = data;
+
+      router.push({ query: { conversationId } });
+
+      /**
+       * Clear state and close modal
+       */
+      setParticipants([]);
+      setUsername("");
+      onClose();
 
       console.log("HERE IS DATA", data)
     } catch (error: any) {

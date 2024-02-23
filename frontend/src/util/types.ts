@@ -1,7 +1,8 @@
+import { ConversationPopulated } from "../../../backend/src/util/types";
+
 /**
  * Users
  */
-
 export interface ICreateUsernameData {
   createUsername: {
     success: boolean,
@@ -29,6 +30,10 @@ export interface SearchedUser {
 /**
  * Conversations
  */
+export interface ConversationsData {
+  conversations: ConversationPopulated[]
+}
+
 export interface CreateConversationData {
   createConversation: {
     conversationId: string
