@@ -4,14 +4,22 @@ import ConversationModal from "./Modal/Modal";
 import { useState } from "react";
 import { ConversationPopulated } from "../../../../../backend/src/util/types";
 import ConversationItem from "./ConversationItem";
+import { useRouter } from "next/router";
 
 interface IConversationList {
   session: Session;
   conversations: ConversationPopulated[];
+  onViewConversation: (conversationId: string) => void;
 }
 
-const ConversationList: React.FunctionComponent<IConversationList> = ({ session, conversations }) => {
+const ConversationList: React.FunctionComponent<IConversationList> = ({
+  session,
+  conversations,
+  onViewConversation
+}) => {
   const [ isOpen, setIsOpen ] = useState(false);
+  const router = useRouter();
+  const { user: { id: userId } } = session;
 
   const onOpen = () => setIsOpen(true);
   const onClose = () => setIsOpen(false);
@@ -43,7 +51,10 @@ const ConversationList: React.FunctionComponent<IConversationList> = ({ session,
       {conversations.map(conversation => (
         <ConversationItem
           key={conversation.id}
+          userId={userId}
           conversation={conversation}
+          onClick={() => onViewConversation(conversation.id)}
+          isSelected={conversation.id === router.query.conversationId}
         />
       ))}
     </Box>

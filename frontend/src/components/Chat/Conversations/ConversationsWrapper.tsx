@@ -6,6 +6,7 @@ import ConversationOperations from "../../../graphql/operations/conversation";
 import { ConversationsData } from "@/src/util/types";
 import { ConversationPopulated } from "../../../../../backend/src/util/types";
 import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 interface IConversationWrapper {
   session: Session;
@@ -18,10 +19,27 @@ const ConversationWrapper: React.FunctionComponent<IConversationWrapper> = ({ se
     loading: conversationsLoading,
     subscribeToMore
   } = useQuery<ConversationsData, any>(ConversationOperations.Queries.conversations);
+  const router = useRouter();
+  const { query: { conversationId } } = router;
 
   console.log("QUERY DATA", conversationsData);
 
-  const subscribeToMoreConversations = () => {
+  const onViewConversation = async (conversationId: string) => {
+    /**
+     * 1. Push the conversationId to the router query params
+     */
+    router.push({
+      query: {
+        conversationId
+      }
+    });
+
+    /**
+     * 2. Mark the conversation as read
+     */
+  };
+  
+  const subscribeToNewConversations = () => {
     subscribeToMore({
       document: ConversationOperations.Subscriptions.convesationCreated,
       updateQuery: (
@@ -30,8 +48,6 @@ const ConversationWrapper: React.FunctionComponent<IConversationWrapper> = ({ se
       ) => {
 
         if (!subscriptionData.data) return prev;
-
-        console.log("HERE IS SUBSCRIPTION DATA", subscriptionData);
 
         const newConversation = subscriptionData.data.conversationCreated;
 
@@ -49,11 +65,15 @@ const ConversationWrapper: React.FunctionComponent<IConversationWrapper> = ({ se
    * Execute subscription on mount
    */
   useEffect(() => {
-    subscribeToMoreConversations();
+    subscribeToNewConversations();
   }, []);
   
   return (
     <Box
+      display={{
+        base: conversationId ? "none" : "flex",
+        md: "flex"
+      }}
       width={{ base: "100%", md: '400px' }}
       bg="whiteAlpha.50"
       py={6}
@@ -63,6 +83,7 @@ const ConversationWrapper: React.FunctionComponent<IConversationWrapper> = ({ se
       <ConversationList
         session={session}
         conversations={conversationsData?.conversations || []}
+        onViewConversation={onViewConversation}
       />
     </Box>
   );
