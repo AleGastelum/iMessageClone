@@ -1,8 +1,6 @@
-import { ApolloServer } from "apollo-server-express";
-import {
-	ApolloServerPluginDrainHttpServer,
-	ApolloServerPluginLandingPageLocalDefault,
-} from "apollo-server-core";
+import { ApolloServer } from "@apollo/server";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { expressMiddleware } from "@apollo/server/express4";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import express from "express";
 import http from "http";
@@ -15,6 +13,8 @@ import { PrismaClient } from "@prisma/client";
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { PubSub } from 'graphql-subscriptions';
+import cors from "cors";
+import { json } from "body-parser";
 
 async function main() {
 	// Required logic for integrating with Express
@@ -64,26 +64,11 @@ async function main() {
 		wsServer
 	);
 
-	const corsOptions = {
-		origin: process.env.CLIENT_ORIGIN,
-		credentials: true,
-	};
-
 	// Same ApolloServer initialization as before, plus the drain plugin
 	// for our httpServer.
 	const server = new ApolloServer({
 		schema,
 		csrfPrevention: true,
-		cache: "bounded",
-		context: async ({ req, res }): Promise<GraphQLContext> => {
-			const session = await getSession({ req }) as Session;
-
-			return {
-				session,
-				prisma,
-				pubsub
-			};
-		},
 		plugins: [
 			// Proper shutdown for the HTTP server.
 			ApolloServerPluginDrainHttpServer({ httpServer }),
@@ -98,28 +83,39 @@ async function main() {
 				};
 			  },
 			},
-			ApolloServerPluginLandingPageLocalDefault({ embed: true }),
-		  ],
+		],
 	});
 
 	// More required logic for integrating with Express
 	await server.start();
-	server.applyMiddleware({
-		app,
-		cors: corsOptions,
-		// By default, apollo-server hosts its GraphQL endpoint at the
-		// server root. However, *other* Apollo Server packages host it at
-		// /graphql. Optionally provide this to match apollo-server.
-		path: "/",
-	});
 
-	// Modified server startup
+	const corsOptions = {
+		origin: process.env.CLIENT_ORIGIN,
+		credentials: true,
+	};
+	
+	app.use(
+		"/graphql",
+		cors<cors.CorsRequest>(corsOptions),
+		json(),
+		expressMiddleware(server, {
+			context: async ({ req }): Promise<GraphQLContext> => {
+				const session = await getSession({ req });
+
+				return {
+					session: session as Session, prisma, pubsub
+				}
+			}
+		})
+	);
+
+	const PORT = 4000;
+
 	await new Promise<void>((resolve) =>
-		httpServer.listen({ port: 4000 }, resolve)
-	);
-	console.log(
-		`🚀 Server ready at http://localhost:4000${server.graphqlPath}`
-	);
+		httpServer.listen({ port: PORT }, resolve)
+	)
+
+	console.log(`Server is now running on http://localhost:${PORT}/graphql`);
 }
 
 main().catch((err) => console.log(err));
