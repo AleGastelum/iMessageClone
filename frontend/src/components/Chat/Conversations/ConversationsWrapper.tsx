@@ -7,6 +7,7 @@ import { ConversationsData } from "@/src/util/types";
 import { ConversationPopulated } from "../../../../../backend/src/util/types";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import SkeletonLoader from "../../common/SkeletonLoader";
 
 interface IConversationWrapper {
   session: Session;
@@ -41,7 +42,7 @@ const ConversationWrapper: React.FunctionComponent<IConversationWrapper> = ({ se
   
   const subscribeToNewConversations = () => {
     subscribeToMore({
-      document: ConversationOperations.Subscriptions.convesationCreated,
+      document: ConversationOperations.Subscriptions.conversationCreated,
       updateQuery: (
         prev,
         { subscriptionData } : { subscriptionData: { data: { conversationCreated: ConversationPopulated } } }
@@ -75,16 +76,25 @@ const ConversationWrapper: React.FunctionComponent<IConversationWrapper> = ({ se
         md: "flex"
       }}
       width={{ base: "100%", md: '400px' }}
+      flexDirection="column"
       bg="whiteAlpha.50"
+      gap={4}
       py={6}
       px={3}
     >
-      {/* Sekeleton Loader */}
-      <ConversationList
-        session={session}
-        conversations={conversationsData?.conversations || []}
-        onViewConversation={onViewConversation}
-      />
+      {conversationsLoading ? (
+          <SkeletonLoader
+            count={7}
+            height="80px"
+          />
+        ) : (
+          <ConversationList
+            session={session}
+            conversations={conversationsData?.conversations || []}
+            onViewConversation={onViewConversation}
+          />
+        )
+      }
     </Box>
   );
 };
