@@ -1,9 +1,9 @@
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
 import { Box } from "@chakra-ui/react";
 import { Session } from "next-auth";
 import ConversationList from "./ConversationList";
 import ConversationOperations from "../../../graphql/operations/conversation";
-import { ConversationsData } from "@/src/util/types";
+import { ConversationUpdatedData, ConversationsData } from "@/src/util/types";
 import { ConversationPopulated, ParticipantPopulated } from "../../../../../backend/src/util/types";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
@@ -33,7 +33,30 @@ const ConversationWrapper: React.FunctionComponent<IConversationWrapper> = ({ se
     { userId: string; conversationId: string }
   >(ConversationOperations.Mutations.markConversationAsRead);
 
-  console.log("QUERY DATA", conversationsData);
+  useSubscription<ConversationUpdatedData, null>(
+    ConversationOperations.Subscriptions.conversationUpdated,
+    {
+      onData: ({ client, data }) => {
+        const {
+          data: subscriptionData
+        } = data;
+
+        console.log("ON DATA FIRING", subscriptionData);
+        
+        if (!subscriptionData) return;
+
+        const {
+          conversationUpdated: { conversation: updatedConversation }
+        } = subscriptionData;
+
+        const currentlyVieweingConversation = updatedConversation.id === conversationId;
+
+        if (currentlyVieweingConversation) {
+          onViewConversation(conversationId, false);
+        }
+      }
+    }
+  );
 
   const onViewConversation = async (
     conversationId: string,

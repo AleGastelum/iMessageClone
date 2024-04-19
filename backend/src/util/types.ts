@@ -45,12 +45,18 @@ export interface CreateUsernameResponse {
  * Conversations
  */
 export type ConversationPopulated = Prisma.ConversationGetPayload<{
-  include: typeof conversationPopulated
+  include: typeof conversationPopulated;
 }>
 
 export type ParticipantPopulated = Prisma.ConversationParticipantGetPayload<{
-  include: typeof participantPopulated
+  include: typeof participantPopulated;
 }>
+
+export interface ConversationUpdatedSubscriptionPayload {
+  conversationUpdated: {
+    conversation: ConversationPopulated;
+  }
+}
 
 /**
  * Messages
