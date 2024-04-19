@@ -30,10 +30,9 @@ interface ConversationItemProps {
   conversation: ConversationPopulated;
   onClick: () => void;
   isSelected: boolean;
-  // hasSeenLatestMessage: boolean | undefined;
+  hasSeenLatestMessage: boolean | undefined;
   // onDeleteConversation: (conversationId: string) => void;
   //   onEditConversation?: () => void;
-  //   hasSeenLatestMessage?: boolean;
   //   selectedConversationId?: string;
   //   onLeaveConversation?: (conversation: ConversationPopulated) => void;
 }
@@ -43,7 +42,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
   conversation,
   onClick,
   isSelected,
-  // hasSeenLatestMessage,
+  hasSeenLatestMessage,
   // onDeleteConversation,
   //   selectedConversationId,
   //   onEditConversation,
@@ -98,7 +97,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
           >
             Delete
           </MenuItem>
-          {/* {conversation.participants.length > 2 ? (
+          {conversation.participants.length > 2 ? (
             <MenuItem
               icon={<BiLogOut fontSize={20} />}
               onClick={(event) => {
@@ -118,13 +117,13 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
             >
               Delete
             </MenuItem>
-          )} */}
+          )}
         </MenuList>
       </Menu>
       <Flex position="absolute" left="-6px">
-        {/* {hasSeenLatestMessage === false && (
+        {hasSeenLatestMessage === false && (
           <GoDotFill fontSize={18} color="#6B46C1" />
-        )} */}
+        )}
       </Flex>
       <Avatar />
       <Flex justify="space-between" width="80%" height="100%">

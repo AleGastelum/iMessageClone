@@ -9,7 +9,10 @@ import { useRouter } from "next/router";
 interface IConversationList {
   session: Session;
   conversations: ConversationPopulated[];
-  onViewConversation: (conversationId: string) => void;
+  onViewConversation: (
+    conversationId: string,
+    hasSeenLatestMessage: boolean | undefined
+  ) => void;
 }
 
 const ConversationList: React.FunctionComponent<IConversationList> = ({
@@ -48,15 +51,24 @@ const ConversationList: React.FunctionComponent<IConversationList> = ({
         onClose={onClose}
         session={session}
       />
-      {conversations.map(conversation => (
-        <ConversationItem
-          key={conversation.id}
-          userId={userId}
-          conversation={conversation}
-          onClick={() => onViewConversation(conversation.id)}
-          isSelected={conversation.id === router.query.conversationId}
-        />
-      ))}
+      {conversations.map(conversation => {
+        const participant = conversation.participants.find(
+          (p) => p.user.id === userId
+        );
+        
+        return (
+          <ConversationItem
+            key={conversation.id}
+            userId={userId}
+            conversation={conversation}
+            onClick={() => onViewConversation(
+              conversation.id, participant?.hasSeenLatestMessage || false
+            )}
+            hasSeenLatestMessage={participant?.hasSeenLatestMessage}
+            isSelected={conversation.id === router.query.conversationId}
+          />
+        );
+      })}
     </Box>
   );
 };
