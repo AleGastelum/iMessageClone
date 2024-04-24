@@ -5,6 +5,10 @@ import { useState } from "react";
 import { ConversationPopulated } from "../../../../../backend/src/util/types";
 import ConversationItem from "./ConversationItem";
 import { useRouter } from "next/router";
+import { useMutation } from "@apollo/client";
+import ConversationOperations from "../../../graphql/operations/conversation";
+import { BooleanValueNode } from "graphql";
+import toast from "react-hot-toast";
 
 interface IConversationList {
   session: Session;
@@ -21,11 +25,39 @@ const ConversationList: React.FunctionComponent<IConversationList> = ({
   onViewConversation
 }) => {
   const [ isOpen, setIsOpen ] = useState(false);
+  const [ deleteConversation ] = useMutation<{
+    deleteConversation: boolean;
+    conversationId: string;
+  }>(ConversationOperations.Mutations.deleteConversation);
   const router = useRouter();
   const { user: { id: userId } } = session;
 
+  const sortedConversations = [...conversations].toSorted((a, b) => b.updatedAt.valueOf() - a.updatedAt.valueOf());
+
   const onOpen = () => setIsOpen(true);
   const onClose = () => setIsOpen(false);
+
+  const onDeleteConversation = async (conversationId: string) => {
+    try {
+      toast.promise(
+        deleteConversation({
+          variables: {
+            conversationId,
+          },
+          update: () => {
+            router.replace(typeof process.env.NEXTAUTH_URL === "string" ? process.env.NEXTAUTH_URL : "")
+          }
+        }),
+        {
+          loading: "Deleteing conversation",
+          success: "Conversation deleted",
+          error: "Failed to delete conversation"
+        }
+      );
+    } catch (error) {
+      console.log("onDeleteConversation error", error);
+    }
+  }
   
   return (
     <Box width="100%">
@@ -51,7 +83,7 @@ const ConversationList: React.FunctionComponent<IConversationList> = ({
         onClose={onClose}
         session={session}
       />
-      {conversations.map(conversation => {
+      {sortedConversations.map(conversation => {
         const participant = conversation.participants.find(
           (p) => p.user.id === userId
         );
@@ -66,6 +98,7 @@ const ConversationList: React.FunctionComponent<IConversationList> = ({
             )}
             hasSeenLatestMessage={participant?.hasSeenLatestMessage}
             isSelected={conversation.id === router.query.conversationId}
+            onDeleteConversation={onDeleteConversation}
           />
         );
       })}
